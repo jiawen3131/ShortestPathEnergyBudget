@@ -2,20 +2,16 @@ import json
 import heapq
 
 # Heuristic function for distance between 2 points
-def heuristic(nodeA, goal_node, Coord, Cost):
+def heuristic(nodeA, goal_node, Coord, Cost, energy_budget):
     (xA, yA) = Coord[nodeA]
     (xB, yB) = Coord[goal_node]
     remaining_distance = abs(xA - xB) + abs(yA - yB) # Manhattan distance
-
-    # Calculate the maximum possible resource cost for the remaining distance
-    max_energy_cost = max(Cost.values())  # Assuming this is the maximum energy cost in the graph
-    remaining_energy_cost = max_energy_cost * remaining_distance
-
-    # Estimate the remaining cost by combining energy cost and distance
-    remaining_cost = remaining_energy_cost + remaining_distance
+    remaining_cost = energy_budget * remaining_distance
 
     return 0
+    # return remaining_distance + remaining_cost
     # the closer the heuristic to the actual minimum cost of the shortest path, lesser iteration, hence more efficient
+    # is it admissible?
 
 def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
 
@@ -31,7 +27,7 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
         cost, currentNode, current_budget = heapq.heappop(priority_queue)
 
         if currentNode == goal_node:
-            print("enter last stage")
+            # print("enter last stage")
             if currentNode == goal_node:
                 path = [goal_node]  # Start with the goal node
                 while currentNode != start_node:
@@ -48,14 +44,14 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
             continue
 
         visited.add(currentNode)
-        print(f"node visited = {currentNode}")
+        # print(f"node visited = {currentNode}")
         
         for neighbour in G[currentNode]:
             if current_budget >= Cost[(f"{currentNode},{neighbour}")]:
                 tentative_g_scores = g_scores[currentNode] + Dist[f"{currentNode},{neighbour}"]
                 if tentative_g_scores < g_scores[neighbour]:
                     g_scores[neighbour] = tentative_g_scores
-                    f_scores[neighbour] = g_scores[neighbour] + heuristic(neighbour, goal_node, Coord, Cost)
+                    f_scores[neighbour] = g_scores[neighbour] + heuristic(neighbour, goal_node, Coord, Cost, energy_budget)
                     heapq.heappush(priority_queue, (f_scores[neighbour], neighbour, current_budget - Cost[(f"{currentNode},{neighbour}")]))
     
     return [], float("inf"), float("inf")  # No path found to the end node

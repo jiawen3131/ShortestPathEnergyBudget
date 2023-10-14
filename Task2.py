@@ -60,7 +60,7 @@ def main():
     if shortest_solution is None:
         print(f"No path found from node 1 to node 50 within the energy constraint of {energy_constraint}.")
     else:
-        formatted_path = format_path(shortest_solution[0])
+        formatted_path = format_path(shortest_solution[0]+[end_node])
         shortest_distance = shortest_solution[1]
         total_energy_cost = shortest_solution[2]
 

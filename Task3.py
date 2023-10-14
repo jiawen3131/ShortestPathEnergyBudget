@@ -3,12 +3,10 @@ import heapq
 import math
 
 # Heuristic function for distance between 2 points
-def heuristic(nodeA, goal_node, Coord, Cost, energy_budget):
+def heuristic(nodeA, goal_node, Coord):
     (xA, yA) = Coord[nodeA]
     (xB, yB) = Coord[goal_node]
-    remaining_distance = abs(xA - xB) + abs(yA - yB) # Manhattan distance
     euclidean_distance = math.sqrt((xA - xB)**2 + (yA - yB)**2)
-    remaining_cost = energy_budget * remaining_distance
 
     return euclidean_distance
     # return remaining_distance + remaining_cost
@@ -16,51 +14,36 @@ def heuristic(nodeA, goal_node, Coord, Cost, energy_budget):
     # is it admissible?
 
 def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
-
-    priority_queue = [(0, start_node, energy_budget)]  # Priority queue to store (cost, node) tuple
-    g_scores = {node: float("inf") for node in G}
-    f_scores = {node: float("inf") for node in G}
-    g_scores[start_node] = 0
-    f_scores[start_node] = 0
-    visited = set()
-    visited_forPath = set()
+    priority_queue = [(0, 0, 0, start_node, [])]
+    visited = set()  # Set to keep track of visited nodes
+    shortest_solution = None
     expanded = 0
 
     while priority_queue:
-        cost, currentNode, current_budget = heapq.heappop(priority_queue)
+        f_scores, distance, total_energy_cost, current_node, path = heapq.heappop(priority_queue)
 
-        if currentNode == goal_node:
-            # print("enter last stage")
-            if currentNode == goal_node:
-                path = [goal_node]  # Start with the goal node
-                while currentNode != start_node:
-                    for neighbour in G[currentNode]:
-                        if g_scores[neighbour] + Dist[f"{neighbour},{currentNode}"] == g_scores[currentNode]:
-                            visited_forPath.add(currentNode)
-                            path.append(neighbour)
-                            currentNode = neighbour
-                            break
-                path.reverse()  # Reverse the path to get it in the correct order
+        if current_node == goal_node:
+            # Found a path to the end node
+            if shortest_solution is None or distance < shortest_solution[1]:
+                shortest_solution = (path, distance, total_energy_cost)
+                # print(f"Nodes visited = {expanded}")
 
-            print(f"nodes expanded = {expanded}")
-            return path, g_scores[goal_node], energy_budget-current_budget
-        
-        if currentNode in visited:
-            continue
+        if current_node in visited:
+            continue  # Skip nodes that have already been visited
 
-        visited.add(currentNode)
+        visited.add(current_node)
         expanded += 1
-        # print(f"node visited = {currentNode}")
-        
-        for neighbour in G[currentNode]:
-            if current_budget >= Cost[(f"{currentNode},{neighbour}")]:
-                tentative_g_scores = g_scores[currentNode] + Dist[f"{currentNode},{neighbour}"]
-                if tentative_g_scores < g_scores[neighbour]:
-                    g_scores[neighbour] = tentative_g_scores
-                    f_scores[neighbour] = g_scores[neighbour] + heuristic(neighbour, goal_node, Coord, Cost, energy_budget)
-                    heapq.heappush(priority_queue, (f_scores[neighbour], neighbour, current_budget - Cost[(f"{currentNode},{neighbour}")]))
-    
-    return [], float("inf"), float("inf")  # No path found to the end node
+
+        for neighbor in G[current_node]:
+            neighbor_distance = Dist[f"{current_node},{neighbor}"]
+            new_energy_cost = total_energy_cost + Cost[f"{current_node},{neighbor}"]
+            new_distance = distance + neighbor_distance
+
+            if new_energy_cost <= energy_budget:
+                f_scores = new_distance + 0.05*new_energy_cost + heuristic(neighbor, goal_node, Coord) # You can adjust this cost function to balance distance and energy
+                heapq.heappush(priority_queue, (f_scores, new_distance, new_energy_cost, neighbor, path + [current_node]))
+
+    return shortest_solution  # Return the solution with the shortest distance within the energy constraint
 
 def format_path(path):
     return '->'.join(path)
@@ -84,15 +67,17 @@ def main():
     energy_budget = 287932
 
     # Perform A* search 
-    shortest_path, shortest_path_cost, total_energy_cost = astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget)
+    shortest_solution = astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget)
 
-    if shortest_path_cost == float("inf"):
+    if shortest_solution == None:
         print("No path found from node 1 to node 50.")
     else:
-        formatted_path = format_path(shortest_path)
-       
+        formatted_path = format_path(shortest_solution[0]+[goal_node])
+        shortest_distance = shortest_solution[1]
+        total_energy_cost = shortest_solution[2]
+
         print(f"Shortest path: {formatted_path}.")
-        print(f"Shortest distance: {shortest_path_cost}.")
+        print(f"Shortest distance: {shortest_distance}.")
         print(f"Total energy cost: {total_energy_cost}.")
 
 if __name__ == "__main__":

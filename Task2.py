@@ -28,7 +28,7 @@ def modified_uniform_cost_search(G, Coord, Dist, Cost, start_node, end_node, ene
             new_distance = distance + neighbor_distance
 
             if new_energy_cost <= energy_constraint:
-                combined_cost = new_distance  # You can adjust this cost function to balance distance and energy
+                combined_cost = new_distance + 0.05*new_energy_cost  # You can adjust this cost function to balance distance and energy
                 heapq.heappush(priority_queue, (combined_cost, new_distance, new_energy_cost, neighbor, path + [node]))
 
     return shortest_solution  # Return the solution with the shortest distance within the energy constraint

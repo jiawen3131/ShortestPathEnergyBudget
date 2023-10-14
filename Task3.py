@@ -1,14 +1,16 @@
 import json
 import heapq
+import math
 
 # Heuristic function for distance between 2 points
 def heuristic(nodeA, goal_node, Coord, Cost, energy_budget):
     (xA, yA) = Coord[nodeA]
     (xB, yB) = Coord[goal_node]
     remaining_distance = abs(xA - xB) + abs(yA - yB) # Manhattan distance
+    euclidean_distance = math.sqrt((xA - xB)**2 + (yA - yB)**2)
     remaining_cost = energy_budget * remaining_distance
 
-    return 0
+    return euclidean_distance
     # return remaining_distance + remaining_cost
     # the closer the heuristic to the actual minimum cost of the shortest path, lesser iteration, hence more efficient
     # is it admissible?
@@ -22,7 +24,8 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
     f_scores[start_node] = 0
     visited = set()
     visited_forPath = set()
-    
+    expanded = 0
+
     while priority_queue:
         cost, currentNode, current_budget = heapq.heappop(priority_queue)
 
@@ -38,12 +41,15 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
                             currentNode = neighbour
                             break
                 path.reverse()  # Reverse the path to get it in the correct order
+
+            print(f"nodes expanded = {expanded}")
             return path, g_scores[goal_node], energy_budget-current_budget
         
         if currentNode in visited:
             continue
 
         visited.add(currentNode)
+        expanded += 1
         # print(f"node visited = {currentNode}")
         
         for neighbour in G[currentNode]:

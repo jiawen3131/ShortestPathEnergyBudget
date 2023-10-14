@@ -19,6 +19,7 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
     f_scores[start_node] = heuristic(start_node, goal_node, Coord)
     visited = set()
     visited_forPath = set()
+    expanded = 0
     
     while priority_queue:
         cost, currentNode, current_budget = heapq.heappop(priority_queue)
@@ -33,12 +34,14 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
                         currentNode = neighbour
                         break
             path.reverse()  # Reverse the path to get it in the correct order
+            print(f"nodes expanded = {expanded}")
             return path, g_scores[goal_node], energy_budget - current_budget
         
         if currentNode in visited:
             continue
 
         visited.add(currentNode)
+        expanded += 1
         
         for neighbour in G[currentNode]:
             if current_budget >= Cost[(f"{currentNode},{neighbour}")]:

@@ -33,7 +33,7 @@ def heuristic(nodeA, goal_node, Coord):
     coord1 = (convert_format(Coord[nodeA][0]), convert_format(Coord[nodeA][1]))
     coord2 = (convert_format(Coord[goal_node][0]), convert_format(Coord[goal_node][1]))
 
-    h_distance = haversine_distance(coord1, coord2)*10000
+    h_distance = haversine_distance(coord1, coord2)*1000
 
     return h_distance
 
@@ -93,14 +93,17 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
         # Explore the neighbor nodes of the current pop-ed node
         for neighbor in G[current_node]:
             neighbor_distance = Dist[f"{current_node},{neighbor}"]
-            new_energy_cost = total_energy_cost + Cost[f"{current_node},{neighbor}"]
+            energy_cost = Cost[f"{current_node},{neighbor}"]
+            new_energy_cost = total_energy_cost + energy_cost
             new_distance = distance + neighbor_distance
 
             # Check if the cumulated energy cost is within the energy budget
             if new_energy_cost <= energy_budget:
 
                 # Calculate the new f_scores, considerting both distance, energy cost, and heuristic (distance of neighbor to goal node)
-                f_scores = new_distance + heuristic(neighbor, goal_node, Coord)
+                w_energy = 0.0
+                w_euclidean = 100
+                f_scores = new_distance + w_energy*energy_cost*heuristic(neighbor, goal_node, Coord)
                 
                 # Push the neighbor node to the priority queue for further exploration 
                 heapq.heappush(priority_queue, (f_scores, new_distance, new_energy_cost, neighbor, path + [current_node]))

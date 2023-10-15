@@ -127,7 +127,7 @@ def main():
         print()
     
     # Print footer.
-    print("*"*30)
+    print("*"*85)
 
 if __name__ == "__main__":
     main()

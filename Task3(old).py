@@ -2,41 +2,20 @@ import json
 import heapq
 import math
 
-# Function to convert the format -73530767 to 73.530767 and vice versa
-def convert_format(value):
-    return value / 1000000
+# Heuristic function for distance between 2 points
+def heuristic(nodeA, goal_node, Coord, total_energy_cost):
+    (xA, yA) = Coord[nodeA]
+    (xB, yB) = Coord[goal_node]
+    euclidean_distance = math.sqrt((xA - xB)**2 + (yA - yB)**2)
+    euclidean_distance_contraint = math.sqrt(euclidean_distance) + 0.05*total_energy_cost
+    # euclidean_distance_contraint = euclidean_distance / (287932 - total_energy_cost + 1)
+    # euclidean_distance_contraint = (287932 - total_energy_cost) / (euclidean_distance+1)
+    # print(f"euclidean dist = {euclidean_distance}")
+    # print(f"Total energy cost = {total_energy_cost}")
+    # print(f"heuristic value = {euclidean_distance_contraint}")
 
-# Function to calculate the Haversine distance between two coordinates
-def haversine_distance(coord1, coord2):
-    # Radius of the Earth in kilometers
-    earth_radius = 6371.0
-
-    # Convert latitude and longitude from degrees to radians
-    lat1 = math.radians(coord1[1])
-    lon1 = math.radians(coord1[0])
-    lat2 = math.radians(coord2[1])
-    lon2 = math.radians(coord2[0])
-
-    # Haversine formula
-    dlon = lon2 - lon1
-    dlat = lat2 - lat1
-
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
-    distance = earth_radius * c
-
-    return distance
-
-# Heuristic function for Haversine distance between 2 points
-def heuristic(nodeA, goal_node, Coord, new_energy_cost, w_energy):
-    coord1 = (convert_format(Coord[nodeA][0]), convert_format(Coord[nodeA][1]))
-    coord2 = (convert_format(Coord[goal_node][0]), convert_format(Coord[goal_node][1]))
-
-    h_distance = haversine_distance(coord1, coord2)*1000
-    h_distance_constraint = h_distance + w_energy*new_energy_cost
-
-    return h_distance_constraint
+    return euclidean_distance_contraint
+    # the closer the heuristic to the actual minimum cost of the shortest path, lesser iteration, hence more efficient
 
 def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
     """
@@ -94,18 +73,15 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
         # Explore the neighbor nodes of the current pop-ed node
         for neighbor in G[current_node]:
             neighbor_distance = Dist[f"{current_node},{neighbor}"]
-            energy_cost = Cost[f"{current_node},{neighbor}"]
-            new_energy_cost = total_energy_cost + energy_cost
+            new_energy_cost = total_energy_cost + Cost[f"{current_node},{neighbor}"]
             new_distance = distance + neighbor_distance
 
             # Check if the cumulated energy cost is within the energy budget
             if new_energy_cost <= energy_budget:
 
                 # Calculate the new f_scores, considerting both distance, energy cost, and heuristic (distance of neighbor to goal node)
-                w_energy = 0.05
-                w_euclidean = 1
-                f_scores = new_distance + w_euclidean*heuristic(neighbor, goal_node, Coord, new_energy_cost, w_energy)
-                
+                f_scores = new_distance + heuristic(neighbor, goal_node, Coord, new_energy_cost)
+
                 # Push the neighbor node to the priority queue for further exploration 
                 heapq.heappush(priority_queue, (f_scores, new_distance, new_energy_cost, neighbor, path + [current_node]))
 
@@ -167,7 +143,7 @@ def main():
         print()
 
         # Print footer.
-        print("*"*73)
+        print("*"*74)
 
 if __name__ == "__main__":
     main()

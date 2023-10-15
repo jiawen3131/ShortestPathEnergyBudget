@@ -29,13 +29,14 @@ def haversine_distance(coord1, coord2):
     return distance
 
 # Heuristic function for Haversine distance between 2 points
-def heuristic(nodeA, goal_node, Coord):
+def heuristic(nodeA, goal_node, Coord, new_energy_cost, w_energy):
     coord1 = (convert_format(Coord[nodeA][0]), convert_format(Coord[nodeA][1]))
     coord2 = (convert_format(Coord[goal_node][0]), convert_format(Coord[goal_node][1]))
 
     h_distance = haversine_distance(coord1, coord2)*1000
+    h_distance_constraint = h_distance + w_energy*new_energy_cost
 
-    return h_distance
+    return h_distance_constraint
 
 def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
     """
@@ -103,7 +104,7 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
                 # Calculate the new f_scores, considerting both distance, energy cost, and heuristic (distance of neighbor to goal node)
                 w_energy = 0.05
                 w_euclidean = 1
-                f_scores = new_distance + w_energy*new_energy_cost + w_euclidean*heuristic(neighbor, goal_node, Coord)
+                f_scores = new_distance + w_euclidean*heuristic(neighbor, goal_node, Coord, new_energy_cost, w_energy)
                 
                 # Push the neighbor node to the priority queue for further exploration 
                 heapq.heappush(priority_queue, (f_scores, new_distance, new_energy_cost, neighbor, path + [current_node]))

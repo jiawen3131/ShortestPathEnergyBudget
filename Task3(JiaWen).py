@@ -101,9 +101,9 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
             if new_energy_cost <= energy_budget:
 
                 # Calculate the new f_scores, considerting both distance, energy cost, and heuristic (distance of neighbor to goal node)
-                w_energy = 0.0
-                w_euclidean = 100
-                f_scores = new_distance + w_energy*energy_cost*heuristic(neighbor, goal_node, Coord)
+                w_energy = 0.05
+                w_euclidean = 1
+                f_scores = new_distance + w_energy*new_energy_cost + w_euclidean*heuristic(neighbor, goal_node, Coord)
                 
                 # Push the neighbor node to the priority queue for further exploration 
                 heapq.heappush(priority_queue, (f_scores, new_distance, new_energy_cost, neighbor, path + [current_node]))

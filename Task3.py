@@ -7,32 +7,15 @@ def heuristic(nodeA, goal_node, Coord, total_energy_cost):
     (xA, yA) = Coord[nodeA]
     (xB, yB) = Coord[goal_node]
     euclidean_distance = math.sqrt((xA - xB)**2 + (yA - yB)**2)
-    euclidean_distance_contraint = euclidean_distance + 0.05*total_energy_cost
+    euclidean_distance_contraint = math.sqrt(euclidean_distance) + 0.05*total_energy_cost
     # euclidean_distance_contraint = euclidean_distance / (287932 - total_energy_cost + 1)
-    euclidean_distance_contraint = (287932 - total_energy_cost) / (euclidean_distance+1)
+    # euclidean_distance_contraint = (287932 - total_energy_cost) / (euclidean_distance+1)
+    # print(f"euclidean dist = {euclidean_distance}")
+    # print(f"Total energy cost = {total_energy_cost}")
+    # print(f"heuristic value = {euclidean_distance_contraint}")
 
     return euclidean_distance_contraint
     # the closer the heuristic to the actual minimum cost of the shortest path, lesser iteration, hence more efficient
-
-def heuristic2(nodeA, goal_node, Coord, total_energy_cost):
-    (xA, yA) = Coord[nodeA]
-    (xB, yB) = Coord[goal_node]
-    # Calculate Haversine distance (in kilometers) between nodeA and nodeB
-    R = 6371  # Mean radius of the Earth in kilometers
-    lat1 = math.radians(xA)
-    lon1 = math.radians(yA)
-    lat2 = math.radians(xB)
-    lon2 = math.radians(yB)
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    haversine_distance = R * c
-    
-    euclidean_distance_contraint = (haversine_distance) / total_energy_cost
-    euclidean_distance = math.sqrt((xA - xB)**2 + (yA - yB)**2)
-    euclidean_distance_contraint = 148648 + euclidean_distance
-    return euclidean_distance_contraint
 
 def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
     """
@@ -97,7 +80,7 @@ def astar_search(G, Coord, Dist, Cost, start_node, goal_node, energy_budget):
             if new_energy_cost <= energy_budget:
 
                 # Calculate the new f_scores, considerting both distance, energy cost, and heuristic (distance of neighbor to goal node)
-                f_scores = new_distance + heuristic2(neighbor, goal_node, Coord, new_energy_cost)
+                f_scores = new_distance + heuristic(neighbor, goal_node, Coord, new_energy_cost)
 
                 # Push the neighbor node to the priority queue for further exploration 
                 heapq.heappush(priority_queue, (f_scores, new_distance, new_energy_cost, neighbor, path + [current_node]))

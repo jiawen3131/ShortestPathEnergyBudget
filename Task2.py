@@ -62,7 +62,7 @@ def modified_uniform_cost_search(G, Coord, Dist, Cost, start_node, end_node, ene
             if new_energy_cost <= energy_constraint:
 
                 # Calculate the new combined cost, considering both distance and energy cost.
-                combined_cost = new_distance
+                combined_cost = new_distance + total_energy_cost*0.05
 
                 # Add the neighbor to the priority queue for further exploration.
                 heapq.heappush(priority_queue, (combined_cost, new_distance, new_energy_cost, neighbor, path + [node]))

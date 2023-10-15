@@ -4,7 +4,7 @@ import math
 
 # Function to convert the format -73530767 to 73.530767 and vice versa
 def convert_format(value):
-    return value / 1_000_000
+    return value / 1000000
 
 # Function to calculate the Haversine distance between two coordinates
 def haversine_distance(coord1, coord2):
